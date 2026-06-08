@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, Calendar, Edit2, Trash2, X, Share2 } from 'lucide-react';
+import { MapPin, Calendar, Edit2, Trash2, X, Share2, GitCompare, Check } from 'lucide-react';
 import type { Bench } from '../../types/bench';
 import { TAG_ICONS, TAG_COLORS } from '../../types/bench';
 import { useBenchStore } from '../../store/useBenchStore';
@@ -13,9 +13,19 @@ interface PostcardCardProps {
 }
 
 export default function PostcardCard({ bench, onClose }: PostcardCardProps) {
-  const { deleteBench } = useBenchStore();
+  const { deleteBench, compareBenchIds, toggleCompareBench, toggleCompareMode } = useBenchStore();
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const isInCompare = compareBenchIds.includes(bench.id);
+
+  const handleToggleCompare = () => {
+    if (!isInCompare && compareBenchIds.length >= 4) {
+      alert('最多只能对比 4 张长椅');
+      return;
+    }
+    toggleCompareBench(bench.id);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -145,6 +155,27 @@ export default function PostcardCard({ bench, onClose }: PostcardCardProps) {
 
                 <div className="flex gap-3 pt-4">
                   <button
+                    onClick={handleToggleCompare}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-all font-medium ${
+                      isInCompare
+                        ? 'bg-violet-500 text-white border border-violet-500 shadow-lg shadow-violet-200'
+                        : 'bg-white/80 text-stone-600 border border-stone-200 hover:bg-white hover:shadow-md'
+                    }`}
+                    style={{ fontFamily: "'Lora', serif" }}
+                  >
+                    {isInCompare ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        已加入对比
+                      </>
+                    ) : (
+                      <>
+                        <GitCompare className="w-4 h-4" />
+                        加入对比
+                      </>
+                    )}
+                  </button>
+                  <button
                     onClick={() => setIsEditing(true)}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/80 text-stone-600 border border-stone-200 hover:bg-white hover:shadow-md transition-all font-medium"
                     style={{ fontFamily: "'Lora', serif" }}
@@ -171,6 +202,20 @@ export default function PostcardCard({ bench, onClose }: PostcardCardProps) {
                     <Share2 className="w-4 h-4" />
                   </button>
                 </div>
+
+                {isInCompare && compareBenchIds.length >= 2 && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      toggleCompareMode();
+                    }}
+                    className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:shadow-lg hover:shadow-violet-200 transition-all font-medium"
+                    style={{ fontFamily: "'Lora', serif" }}
+                  >
+                    <GitCompare className="w-4 h-4" />
+                    查看对比结果 ({compareBenchIds.length}/4)
+                  </button>
+                )}
               </div>
 
               <div className="order-1 md:order-2">

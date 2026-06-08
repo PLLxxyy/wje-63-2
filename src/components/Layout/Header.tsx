@@ -1,8 +1,8 @@
-import { Download, Filter, MapPin } from 'lucide-react';
+import { Download, Filter, MapPin, GitCompare } from 'lucide-react';
 import { useBenchStore } from '../../store/useBenchStore';
 
 export default function Header() {
-  const { exportData, setFilterOpen, isFilterOpen, benches } = useBenchStore();
+  const { exportData, setFilterOpen, isFilterOpen, benches, toggleCompareMode, compareMode, compareBenchIds } = useBenchStore();
 
   const handleImport = () => {
     const input = document.createElement('input');
@@ -52,6 +52,25 @@ export default function Header() {
                 已标记 {benches.length} 张长椅
               </span>
             </div>
+
+            <button
+              onClick={toggleCompareMode}
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                compareMode
+                  ? 'bg-violet-500 text-white shadow-lg shadow-violet-200'
+                  : 'bg-white/80 text-stone-700 hover:bg-white hover:shadow-md border border-amber-200/50'
+              }`}
+            >
+              <GitCompare className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline" style={{ fontFamily: "'Lora', serif" }}>
+                对比
+              </span>
+              {compareBenchIds.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {compareBenchIds.length}
+                </span>
+              )}
+            </button>
 
             <button
               onClick={() => setFilterOpen(!isFilterOpen)}

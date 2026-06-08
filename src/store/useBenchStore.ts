@@ -11,6 +11,8 @@ interface BenchStore {
   isAdding: boolean;
   pendingLocation: { lat: number; lng: number } | null;
   isFilterOpen: boolean;
+  compareMode: boolean;
+  compareBenchIds: string[];
 
   addBench: (
     bench: Omit<Bench, 'id' | 'createdAt' | 'updatedAt'>
@@ -33,6 +35,10 @@ interface BenchStore {
   exportData: () => void;
   importData: (geojsonString: string) => void;
   loadFromStorage: () => void;
+  toggleCompareMode: () => void;
+  toggleCompareBench: (benchId: string) => void;
+  clearCompare: () => void;
+  getCompareBenches: () => Bench[];
 }
 
 const initialFilters: FilterState = {
@@ -48,6 +54,8 @@ export const useBenchStore = create<BenchStore>((set, get) => ({
   isAdding: false,
   pendingLocation: null,
   isFilterOpen: false,
+  compareMode: false,
+  compareBenchIds: [],
 
   addBench: (bench) => {
     const now = new Date().toISOString();
@@ -76,7 +84,8 @@ export const useBenchStore = create<BenchStore>((set, get) => ({
     const benches = get().benches.filter((bench) => bench.id !== id);
     const selectedBench =
       get().selectedBench?.id === id ? null : get().selectedBench;
-    set({ benches, selectedBench });
+    const compareBenchIds = get().compareBenchIds.filter((bid) => bid !== id);
+    set({ benches, selectedBench, compareBenchIds });
     saveToStorage(benches);
   },
 
@@ -179,5 +188,41 @@ export const useBenchStore = create<BenchStore>((set, get) => ({
       set({ benches: MOCK_BENCHES });
       saveToStorage(MOCK_BENCHES);
     }
+  },
+
+  toggleCompareMode: () => {
+    set((state) => ({
+      compareMode: !state.compareMode,
+      compareBenchIds: !state.compareMode ? [] : state.compareBenchIds,
+    }));
+  },
+
+  toggleCompareBench: (benchId: string) => {
+    set((state) => {
+      const isSelected = state.compareBenchIds.includes(benchId);
+      if (isSelected) {
+        return {
+          compareBenchIds: state.compareBenchIds.filter((id) => id !== benchId),
+        };
+      } else {
+        if (state.compareBenchIds.length >= 4) {
+          return state;
+        }
+        return {
+          compareBenchIds: [...state.compareBenchIds, benchId],
+        };
+      }
+    });
+  },
+
+  clearCompare: () => {
+    set({ compareBenchIds: [] });
+  },
+
+  getCompareBenches: () => {
+    const { benches, compareBenchIds } = get();
+    return compareBenchIds
+      .map((id) => benches.find((b) => b.id === id))
+      .filter((b): b is Bench => b !== undefined);
   },
 }));

@@ -3,6 +3,7 @@ import Header from '@/components/Layout/Header';
 import BenchMap from '@/components/Map/BenchMap';
 import FilterPanel from '@/components/Filter/FilterPanel';
 import PostcardCard from '@/components/Card/PostcardCard';
+import ComparePanel from '@/components/Compare/ComparePanel';
 import Modal from '@/components/Layout/Modal';
 import AddBenchForm from '@/components/Form/AddBenchForm';
 import { useBenchStore } from '@/store/useBenchStore';
@@ -14,6 +15,7 @@ export default function Home() {
     isAdding,
     setAdding,
     isFilterOpen,
+    compareMode,
   } = useBenchStore();
 
   return (
@@ -63,6 +65,8 @@ export default function Home() {
           onClose={() => selectBench(null)}
         />
       )}
+
+      {compareMode && <ComparePanel />}
     </div>
   );
 }
