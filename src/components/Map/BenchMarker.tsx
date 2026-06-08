@@ -10,9 +10,10 @@ interface BenchMarkerProps {
   index: number;
 }
 
-const createBenchIcon = (tags: string[], isSelected: boolean, compareMode: boolean) => {
+const createBenchIcon = (tags: string[], isSelected: boolean, compareMode: boolean, index: number) => {
   const primaryTag = tags[0] || '';
   const iconEmoji = TAG_ICONS[primaryTag as keyof typeof TAG_ICONS] || '🪑';
+  const animationDelay = `${index * 0.08}s`;
   
   const bgGradient = isSelected 
     ? 'linear-gradient(135deg, #8B5CF6, #7C3AED)' 
@@ -32,7 +33,7 @@ const createBenchIcon = (tags: string[], isSelected: boolean, compareMode: boole
         width: 48px;
         height: 48px;
         position: relative;
-        animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${animationDelay} forwards;
         opacity: 0;
       ">
         <div class="bench-marker-shadow" style="
@@ -132,7 +133,7 @@ const createPendingIcon = () => {
 export default function BenchMarker({ bench, index }: BenchMarkerProps) {
   const { selectBench, compareMode, compareBenchIds, toggleCompareBench } = useBenchStore();
   const isSelected = compareBenchIds.includes(bench.id);
-  const icon = createBenchIcon(bench.tags, isSelected, compareMode);
+  const icon = createBenchIcon(bench.tags, isSelected, compareMode, index);
 
   const handleClick = () => {
     if (compareMode) {
