@@ -1,6 +1,6 @@
 import { X, Trash2, MapPin, GitCompare, Check } from 'lucide-react';
 import type { Bench, BenchTag, EnvironmentType } from '../../types/bench';
-import { TAG_ICONS, TAG_COLORS, BENCH_TAGS, ENVIRONMENT_TYPES } from '../../types/bench';
+import { TAG_ICONS, TAG_COLORS, BENCH_TAGS } from '../../types/bench';
 import { useBenchStore } from '../../store/useBenchStore';
 import PhotoCarousel from '../Card/PhotoCarousel';
 import Empty from '../Empty';

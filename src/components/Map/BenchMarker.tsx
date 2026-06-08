@@ -1,4 +1,4 @@
-import { Marker, Popup, useMapEvents } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { Check } from 'lucide-react';
 import type { Bench } from '../../types/bench';
