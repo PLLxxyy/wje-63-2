@@ -193,7 +193,6 @@ export const useBenchStore = create<BenchStore>((set, get) => ({
   toggleCompareMode: () => {
     set((state) => ({
       compareMode: !state.compareMode,
-      compareBenchIds: !state.compareMode ? [] : state.compareBenchIds,
     }));
   },
 

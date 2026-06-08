@@ -1,13 +1,12 @@
-import { X, Trash2, MapPin, GitCompare } from 'lucide-react';
-import type { Bench, BenchTag } from '../../types/bench';
-import { TAG_ICONS, TAG_COLORS } from '../../types/bench';
+import { X, Trash2, MapPin, GitCompare, Check } from 'lucide-react';
+import type { Bench, BenchTag, EnvironmentType } from '../../types/bench';
+import { TAG_ICONS, TAG_COLORS, BENCH_TAGS, ENVIRONMENT_TYPES } from '../../types/bench';
 import { useBenchStore } from '../../store/useBenchStore';
 import PhotoCarousel from '../Card/PhotoCarousel';
 import Empty from '../Empty';
 
 export default function ComparePanel() {
   const {
-    compareBenchIds,
     toggleCompareMode,
     toggleCompareBench,
     clearCompare,
@@ -29,6 +28,18 @@ export default function ComparePanel() {
     return benches.every((b) => b.tags.includes(tag));
   };
 
+  const hasMatchingEnvironment = (env: EnvironmentType, benches: Bench[]) => {
+    return benches.every((b) => b.environmentType === env);
+  };
+
+  const getGridClass = () => {
+    const count = compareBenches.length;
+    if (count === 1) return 'grid-cols-1';
+    if (count === 2) return 'grid-cols-1 md:grid-cols-2';
+    if (count === 3) return 'grid-cols-1 md:grid-cols-3';
+    return 'grid-cols-2 md:grid-cols-2 lg:grid-cols-4';
+  };
+
   return (
     <div className="fixed inset-0 z-[2000] flex items-end justify-center pointer-events-none">
       <div
@@ -38,7 +49,7 @@ export default function ComparePanel() {
       />
 
       <div
-        className="relative w-full max-w-7xl mx-4 mb-4 pointer-events-auto"
+        className="relative w-full max-w-7xl mx-4 mb-4 pointer-events-auto max-h-[90vh] overflow-hidden"
         style={{ animation: 'slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
       >
         <div className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 rounded-3xl shadow-2xl overflow-hidden border-2 border-amber-200">
@@ -50,8 +61,8 @@ export default function ComparePanel() {
             }}
           />
 
-          <div className="relative p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="relative p-6 overflow-y-auto max-h-[85vh] custom-scrollbar">
+            <div className="flex items-center justify-between mb-6 sticky top-0 bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 z-10 pb-4 -mt-2 pt-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200">
                   <GitCompare className="w-5 h-5 text-white" />
@@ -99,43 +110,42 @@ export default function ComparePanel() {
                 subtitle="最多可以同时对比 4 张长椅"
               />
             ) : (
-              <div
-                className={`grid gap-4 ${
-                  compareBenches.length === 1
-                    ? 'grid-cols-1'
-                    : compareBenches.length === 2
-                    ? 'grid-cols-1 md:grid-cols-2'
-                    : compareBenches.length === 3
-                    ? 'grid-cols-1 md:grid-cols-3'
-                    : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
-                }`}
-              >
-                {compareBenches.map((bench) => (
-                  <div
-                    key={bench.id}
-                    className="relative bg-white rounded-2xl shadow-lg overflow-hidden border border-amber-100 hover:shadow-xl transition-shadow"
-                  >
-                    <button
-                      onClick={() => toggleCompareBench(bench.id)}
-                      className="absolute top-3 right-3 z-10 p-1.5 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all hover:scale-110 group"
-                    >
-                      <X className="w-4 h-4 text-stone-500 group-hover:text-red-500" />
-                    </button>
-
-                    <div className="p-3">
-                      <div
-                        className="p-2 bg-stone-50 rounded-xl"
-                        style={{
-                          boxShadow:
-                            '0 4px 12px -4px rgba(0,0,0,0.1)',
-                        }}
-                      >
-                        <PhotoCarousel photos={bench.photos} />
+              <div className="space-y-8">
+                <section>
+                  <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-violet-500 rounded-full" />
+                    照片
+                  </div>
+                  <div className={`grid gap-4 ${getGridClass()}`}>
+                    {compareBenches.map((bench) => (
+                      <div key={bench.id} className="relative">
+                        <button
+                          onClick={() => toggleCompareBench(bench.id)}
+                          className="absolute -top-2 -right-2 z-10 p-1.5 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all hover:scale-110 group"
+                        >
+                          <X className="w-3.5 h-3.5 text-stone-500 group-hover:text-red-500" />
+                        </button>
+                        <div
+                          className="p-2 bg-white rounded-2xl shadow-lg"
+                          style={{
+                            boxShadow: '0 4px 12px -4px rgba(0,0,0,0.1)',
+                          }}
+                        >
+                          <PhotoCarousel photos={bench.photos} />
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+                </section>
 
-                    <div className="px-4 pb-4 space-y-3">
-                      <div>
+                <section>
+                  <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full" />
+                    基本信息
+                  </div>
+                  <div className={`grid gap-4 ${getGridClass()}`}>
+                    {compareBenches.map((bench) => (
+                      <div key={bench.id} className="bg-white rounded-2xl p-4 shadow-lg border border-amber-100">
                         <h3
                           className="text-lg font-bold text-stone-800 mb-1"
                           style={{ fontFamily: "'Playfair Display', serif" }}
@@ -147,88 +157,154 @@ export default function ComparePanel() {
                           <span style={{ fontFamily: "'Lora', serif" }}>
                             {bench.location}
                             {bench.city && (
-                              <span className="text-amber-700">
-                                {' '}
-                                · {bench.city}
-                              </span>
+                              <span className="text-amber-700"> · {bench.city}</span>
                             )}
                           </span>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                </section>
 
-                      <div className="space-y-2">
-                        <div className="text-xs font-medium text-stone-400 uppercase tracking-wider">
-                          环境
-                        </div>
-                        <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${
-                            compareBenches.every(
-                              (b) => b.environmentType === bench.environmentType
-                            )
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                              : 'bg-stone-100 text-stone-600 border-stone-200'
+                <section>
+                  <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    环境类型
+                  </div>
+                  <div className={`grid gap-4 ${getGridClass()}`}>
+                    {compareBenches.map((bench) => {
+                      const allMatch = hasMatchingEnvironment(bench.environmentType, compareBenches);
+                      return (
+                        <div
+                          key={bench.id}
+                          className={`rounded-2xl p-4 shadow-lg border ${
+                            allMatch
+                              ? 'bg-emerald-50 border-emerald-200'
+                              : 'bg-white border-stone-200'
                           }`}
-                          style={{ fontFamily: "'Lora', serif" }}
                         >
-                          {bench.environmentType}
-                          {compareBenches.every(
-                            (b) => b.environmentType === bench.environmentType
-                          ) && (
-                            <span className="text-xs">✓ 相同</span>
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="text-xs font-medium text-stone-400 uppercase tracking-wider">
-                          标签
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${
+                              allMatch
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                : 'bg-stone-100 text-stone-600 border-stone-200'
+                            }`}
+                            style={{ fontFamily: "'Lora', serif" }}
+                          >
+                            {bench.environmentType}
+                            {allMatch && (
+                              <span className="flex items-center gap-1 text-xs">
+                                <Check className="w-3 h-3" /> 全部相同
+                              </span>
+                            )}
+                          </span>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {bench.tags.map((tag) => (
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section>
+                  <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full" />
+                    标签对比
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 shadow-lg border border-amber-100">
+                    <div className="space-y-3">
+                      {BENCH_TAGS.map((tag) => {
+                        const allHave = hasMatchingTag(tag, compareBenches);
+                        return (
+                          <div key={tag} className="flex items-center gap-3">
                             <span
-                              key={tag}
-                              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
-                                hasMatchingTag(tag, compareBenches)
-                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                                  : TAG_COLORS[tag]
+                              className={`w-12 text-xs font-medium ${
+                                allHave ? 'text-emerald-600' : 'text-stone-400'
                               }`}
                               style={{ fontFamily: "'Lora', serif" }}
                             >
-                              <span>{TAG_ICONS[tag]}</span>
-                              {tag}
-                              {hasMatchingTag(tag, compareBenches) && (
-                                <span className="text-xs">✓</span>
-                              )}
+                              {TAG_ICONS[tag]}
                             </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {bench.description && (
-                        <div className="space-y-2">
-                          <div className="text-xs font-medium text-stone-400 uppercase tracking-wider">
-                            描述
+                            <div className={`grid gap-2 flex-1 ${getGridClass()}`}>
+                              {compareBenches.map((bench) => {
+                                const hasTag = bench.tags.includes(tag);
+                                return (
+                                  <div
+                                    key={bench.id}
+                                    className={`flex items-center justify-center py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                                      hasTag
+                                        ? allHave
+                                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                          : `${TAG_COLORS[tag]}`
+                                        : 'bg-stone-50 text-stone-300 border-stone-100'
+                                    }`}
+                                    style={{ fontFamily: "'Lora', serif" }}
+                                  >
+                                    {hasTag ? (
+                                      <>
+                                        <Check className="w-3.5 h-3.5 mr-1" />
+                                        有
+                                      </>
+                                    ) : (
+                                      '—'
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                          <div
-                            className="text-sm text-stone-600 leading-relaxed pl-3 border-l-2 border-amber-200"
-                            style={{ fontFamily: "'Lora', serif" }}
-                          >
-                            {bench.description}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="pt-2 border-t border-stone-100">
-                        <div
-                          className="text-xs text-stone-400"
-                          style={{ fontFamily: "'Lora', serif" }}
-                        >
-                          记录于 {formatDate(bench.createdAt)}
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
+                </section>
+
+                {compareBenches.some((b) => b.description) && (
+                  <section>
+                    <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-rose-500 rounded-full" />
+                      描述
+                    </div>
+                    <div className={`grid gap-4 ${getGridClass()}`}>
+                      {compareBenches.map((bench) => (
+                        <div
+                          key={bench.id}
+                          className="bg-white rounded-2xl p-4 shadow-lg border border-amber-100"
+                        >
+                          {bench.description ? (
+                            <div
+                              className="text-sm text-stone-600 leading-relaxed pl-3 border-l-2 border-amber-300"
+                              style={{ fontFamily: "'Lora', serif" }}
+                            >
+                              {bench.description}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-stone-300" style={{ fontFamily: "'Lora', serif" }}>
+                              暂无描述
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section>
+                  <div className="text-xs font-medium text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-stone-400 rounded-full" />
+                    记录时间
+                  </div>
+                  <div className={`grid gap-4 ${getGridClass()}`}>
+                    {compareBenches.map((bench) => (
+                      <div
+                        key={bench.id}
+                        className="bg-white rounded-2xl p-4 shadow-lg border border-amber-100"
+                      >
+                        <span className="text-sm text-stone-500" style={{ fontFamily: "'Lora', serif" }}>
+                          {formatDate(bench.createdAt)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
             )}
           </div>
